@@ -3,3 +3,5 @@ argparse==1.1
 ipython==0.10
 py-bcrypt==0.2
 pysqlite==2.6.0
+pycrypto==2.3
+
