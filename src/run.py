@@ -8,7 +8,7 @@ import argparse
 
 def setup_jtag(args):
 	jt = jtag.JTAG()
-	chain = jt.connect(args.cable, product=int(args.productid, 0x10))
+	chain = jt.connect(args.cable, product=int(args.productid, 0x10), vendor=int(args.vendorid, 0x10))
 
 	print "DETECTED CHAIN CONFIGURATION:"
 
@@ -81,8 +81,8 @@ parser.add_argument('password', help = "password", default = "pass0")
 parser.add_argument('--instances', help = "nr of instances", type=int, default = 1)
 parser.add_argument('--bitstream', help = "bitstream to program", default = None)
 parser.add_argument('--cable', help = "jtag cable", default = "ftdi")
-parser.add_argument('--productid', help = "jtag cable product id (for ftdi)", default = "6110")
-
+parser.add_argument('--productid', help = "jtag cable product id (for ftdi/fx2)", default = "6110")
+parser.add_argument('--vendorid', help = "jtag cable vendor id (for ftdi/fx2)", default = "ffff")
 from crunchy.core.projectconfig import parse_project_config
 
 args = parser.parse_args()
