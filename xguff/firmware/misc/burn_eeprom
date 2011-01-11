@@ -1,0 +1,75 @@
+#!/bin/sh
+# (tested with bash and dash)
+
+#debug=echo
+
+# I2C ROM address is either 0x50 or 0x51.
+# On Avnet Virtex-4 board, that depends on JT4.
+# According to CY7C68013 data sheet, those values code for
+# different sizes of eeprom chips.
+# LLRF4 and LLRF4.1 boards are hardwired to 0x51.
+I2C_ADDR=0x51
+
+# first two bytes of hex string in i2c_write are, according to
+# the ROM (AT24C64A) data sheet, the address within the ROM to write.
+
+# contents of the ROM (see EZUSB TRM table 3-4):
+#   0    C0
+#   1    FF    first byte of Vendor ID
+#   2    FE    second byte of Vendor ID
+#   3    00    first byte of product ID
+#   4    1X    second byte of product ID
+#   5    00    first byte of device ID
+#   6    01    second byte of device ID (USRP says: hardware rev)
+#   7    00    config byte
+
+$debug rmmod usbtest  # I've seen this loaded on many Linux systems
+
+board=$1
+case $board in
+  avnet)  usbpid=18;;
+  llrf4)  usbpid=19;;
+  llrf41) usbpid=1a;;
+  *) echo "unknown board type ($board)" >&2; exit 1;;
+esac
+$debug usrper -x load_firmware /usr/share/usb/lbnl-$board/usrp_main.ihx
+echo "waiting for renumeration"
+$debug sleep 2
+
+# Don't start blasting away at the EEPROM unless this looks like
+# a board we know about
+echo "reading JTAG ID chain"
+jtag_id=`usrper i2c_read 0 16`
+case $jtag_id.$board in
+  93c06701937005?50000000000000000.avnet)  ;;  # Avnet Virtex-4 LX Eval
+  93c06701ffffffff0000000000000000.avnet)  ;;  # Avnet Virtex-4 LX Eval
+  9360a982000000000000000000ffffff.avnet)  ;;  # Avnet AES-XLX-V5LXT-PCIE50-G
+  93c04101000000000000000000ffffff.avnet)  ;;  # XC3S400 LBNL Integrated UXO
+  93804211000000000000000000ffffff.llrf4)  ;;  # XC3S1000 LLRF4
+  93804211000000000000000000ffffff.llrf41) ;;  # XC3S1000 LLRF41
+  *) echo "JTAG ID string $jtag_id unrecognized for board $board; aborting";
+     exit 1;;
+esac
+
+$debug usrper i2c_write $I2C_ADDR 0000c0feff${usbpid}00010000
+
+# Having a unique USB code lets this stuff come up automagically on Linux
+# using the udev subsystem.  See README.LLRF4 for additional comments.
+
+# in usrp_main.c I find
+#define SERIAL_NO_OFFSET        248
+#define SERIAL_NO_LEN             8
+# in hex, that means the start address is 00f8
+
+serial=$2
+if [ ! -z "$serial" ]; then
+  hexs=`printf "%s" $serial | hexdump -v -e '1/1 "%02x"'`
+  if [ ${#hexs} != 16 ]; then
+     echo "requested serial number \"$serial\" is not 8 bytes long: aborting"
+     exit 1
+  fi
+  echo "setting serial number to \"$serial\" ($hexs)"
+  $debug usrper i2c_write $I2C_ADDR 00f8$hexs
+fi
+
+# see also read_serial

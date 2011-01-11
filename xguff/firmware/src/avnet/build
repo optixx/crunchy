@@ -1,0 +1,1 @@
+make -f ../avnet/Makefile VPATH=../avnet usrp_main.ihx

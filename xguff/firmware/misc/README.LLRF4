@@ -1,0 +1,26 @@
+To burn a LLRF4-specific USB ID code and serial number into the EEPROM
+on the (non-prototype) LLRF4 board, do the following as root:
+
+sh burn_eeprom llrf41 foo-0001
+
+Do yourself a favor and use a meaningful serial number (such as
+what's written on a manufacturing sticker) instead of foo-0001.
+
+That step will only work if the FPGA is visible on the JTAG chain.
+You can test that step by itself with
+  usrper i2c_read 0 16
+The result should be
+  93804211000000000000000000ffffff
+
+Next, you should install an automatic initialization script,
+so the USB interface will program itself and set permissions
+so non-root users can connect to the FPGA.  Ideally, that is
+part of the functionality of ../../quick_install.  The magic
+udev configuration file installed by that script is
+z60_lbnl_usb.rules, which supports all three USB device IDs
+(fffe:0018, fffe:0019, and fffe:001a).
+
+You will know success when you can power cycle the board,
+a second later D2 turns off, and then you (as a non-root user
+that is a member of the audio group) can read the FPGA's
+JTAG ID as above.

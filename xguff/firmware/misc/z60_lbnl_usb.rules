@@ -1,0 +1,8 @@
+# belongs in /etc/udev/rules.d/z60_lbnl_usb.rules
+# tested with Debian sid, udev version 0.105-1
+SUBSYSTEM=="usb_device", ATTRS{idVendor}=="fffe", ATTRS{idProduct}=="0018", ATTRS{bcdDevice}=="0001", RUN+="/usr/local/bin/usrper -x load_firmware /usr/share/usb/lbnl-avnet/usrp_main.ihx"
+SUBSYSTEM=="usb_device", ATTRS{idVendor}=="fffe", ATTRS{idProduct}=="0019", ATTRS{bcdDevice}=="0001", RUN+="/usr/local/bin/usrper -x load_firmware /usr/share/usb/lbnl-llrf4/usrp_main.ihx"
+SUBSYSTEM=="usb_device", ATTRS{idVendor}=="fffe", ATTRS{idProduct}=="001a", ATTRS{bcdDevice}=="0001", RUN+="/usr/local/bin/usrper -x load_firmware /usr/share/usb/lbnl-llrf41/usrp_main.ihx"
+SUBSYSTEM=="usb_device", ATTRS{idVendor}=="fffe", ATTRS{idProduct}=="0018", ATTRS{bcdDevice}!="0001", GROUP="audio", MODE="0660" 
+SUBSYSTEM=="usb_device", ATTRS{idVendor}=="fffe", ATTRS{idProduct}=="0019", ATTRS{bcdDevice}!="0001", GROUP="audio", MODE="0660" 
+SUBSYSTEM=="usb_device", ATTRS{idVendor}=="fffe", ATTRS{idProduct}=="001a", ATTRS{bcdDevice}!="0001", GROUP="audio", MODE="0660" 

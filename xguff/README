@@ -1,0 +1,70 @@
+This package is condensed and modified from the USRP project,
+in particular a CVS snapshot from September 8, 2005.
+More precisely, this is the USRP component of GnuRadio,
+on the web at
+  http://comsec.com/wiki?GnuRadioWiki
+Their README file is kept here as README.usrp.
+
+The title "xguff" is an attempt at a short, almost-pronounceable
+acronym that is easy to find via Google.  Would you believe
+"Xperimental Gnu USB FPGA Framework"?  I have now used this
+framework twice, once for UXO and once for LLRF4.  Other
+than changing the board's USB ID code, only application-layer
+code differs between the two.
+
+The host-side code is more condensed, and less modified.
+The firmware is somewhat condensed and modified, mostly
+to support JTAG instead of slave serial FPGA programming.
+The example FPGA code is basically written from scratch,
+with a few key ideas reused.  That FPGA code uses a FIFO
+design from OpenCores.
+
+I have trouble with fancy build systems and Makefiles.
+Not that I don't understand why they are needed in the
+general case, but they are troublesome to debug in their
+own right.  So I dumped the stuff from USRP and assume
+"all the world is Debian Linux" (or a close-enough
+substitute: Ubuntu and Fedora, for instance, should work
+fine also).  If you try running on another system, you have
+two options: find the handful of configuration changes
+to throw into the Makefiles (which are really, really
+simple), or retrieve the full USRP project and re-insert
+(and debug) their fancy autoconf/autoheader/automake stuff.
+
+The following steps have been tested on Debian sarge and sid
+(October 2005 - April 2008), and also Ubuntu Edgy (6.10) and
+Gutsy (7.10), and Fedora 8.  First get the required packages:
+   sudo apt-get install build-essential xorg-dev libusb-dev sdcc libfltk1.1-dev freeglut3-dev
+or in Fedora-like distributions maybe:
+   sudo yum install fltk-devel sdcc freeglut-devel
+Then build (you don't need, and shouldn't use, root for this step):
+   sh quick_build
+and install:
+   sudo sh quick_install
+If something goes wrong, study the next paragraphs, which describe
+what is supposed to happen in the quick_* scripts.
+
+To build the host side:
+   (cd host/lib && make)
+   (cd host/apps && make)
+To install the host side, copy host/apps/{bit2rbf,usrper} to
+   someplace in your $PATH.
+Some interesting and nearly usable llrf-specific code is in
+there too: rdrive, rgui, and runpack.  Documentation on these
+programs is nonexistent.
+
+To build the firmware for the Cypress FX2 USB interface chip,
+you need to install sdcc.  "apt-get install sdcc" will do it,
+at the time of writing it's version 2.5.0-8. Then:
+   cd firmware/src/foo
+   make -f ../avnet/Makefile VPATH=../avnet usrp_main.ihx
+To install the firmware, read firmware/misc/README .
+
+The FPGA bitfile and source code is shipped separately.
+
+To purge the tree of object code:
+   (cd host/lib && make clean)
+   (cd host/apps && make clean)
+   rm -rf firmware/src/bld*
+
+    - Larry Doolittle

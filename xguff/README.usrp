@@ -1,0 +1,30 @@
+#
+# README -- the short version
+#
+
+The top level makefile handles the host code and FX2 firmware.
+
+Besides the normal gcc suite and all the auto tools, you'll need
+the SDCC free C compiler to build the firmware.  You MUST
+USE VERSION 2.4.0 due to some problems with variable initialization.
+http://sdcc.sourceforge.net
+
+
+To build the fpga configuration bitstring you'll need Altera's no cost
+Quartus II development tools.  We're currently building with 
+Quartus II 4.2 Web Edition.  The project file is
+usrp/fpga/toplevel/usrp_std/usrp_std.qpf
+
+# To get started...
+
+./bootstrap	# if you're building from CVS
+
+./configure
+make && make check && make install
+
+
+The high level interface to the USRP using our standard FPGA bitstram
+is contained in usrp/host/lib/usrp_standard.h
+
+If you've got doxygen installed, there are html docs in
+usrp/doc/html/index.html

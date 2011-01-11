@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+install -p -t /usr/local/bin/ host/apps/test_usrp_standard_rx host/apps/usrper
+install -d /usr/share/usb/lbnl-avnet /usr/share/usb/lbnl-llrf4 /usr/share/usb/lbnl-llrf41
+install -p -m 644 -t /usr/share/usb/lbnl-avnet  firmware/src/bld18/usrp_main.ihx
+install -p -m 644 -t /usr/share/usb/lbnl-llrf4  firmware/src/bld19/usrp_main.ihx
+install -p -m 644 -t /usr/share/usb/lbnl-llrf41 firmware/src/bld1a/usrp_main.ihx
+
+# This one-liner depends on udev version 93 or greater, tested on
+# Debian Etch/Lenny and Ubuntu 6.10 (Edgy).
+# 
+# Debian Sarge uses udev 056.
+# RedHat Enterprise Linux WS release 4 Nachant update 4 uses udev 039.
+#
+# In the latter two cases, use hotplug instead, seems to work OK, at
+# least if you run a 2.6.x kernel.
+#
+mech=`udevinfo -V | tr ' ' '\n' | while read X; do case $X in [0-9]*) if [ "$X" -gt 93 ]; then echo udev; fi;; esac done`
+if [ "$mech" = "udev" ]; then
+  echo "Modern udev: easy"
+  install -p -m 644 -t /etc/udev/rules.d firmware/misc/z60_lbnl_usb.rules
+else
+  echo "Old hotplug: untested"
+  install -d /etc/hotplug/usb
+  install -p -t /etc/hotplug/usb firmware/misc/lbnl-avnet
+  install -p -m 644 -t /etc/hotplug/usb firmware/misc/lbnl-avnet.usermap
+fi
